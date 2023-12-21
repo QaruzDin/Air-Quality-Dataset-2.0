@@ -22,6 +22,4 @@ streamlit run .\dashboard\dashboard.py
 
 ## Dashboard Result
 
-Click [here](https://air-quality-dataset-2-artsam.streamlit.app/)
-
-![alt]('Screenshot.png')
+https://air-quality-dataset-2-artsam.streamlit.app/
