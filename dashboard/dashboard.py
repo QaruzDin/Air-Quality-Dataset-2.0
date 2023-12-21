@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import streamlit as st
-import time
 
 # Olah Data Cuaca Bulanan
 def make_monthly_climateBeijing(df):
@@ -46,7 +45,7 @@ def make_Beijing_in_AQICategorySum(df):
     Beijing_in_AQICategorySum['Kategori AQI'] = Beijing_in_AQICategorySum['Kategori AQI'].apply(lambda x: x[0])
     return Beijing_in_AQICategorySum
 
-all_df = pd.read_csv('beijing_climateData.csv')
+all_df = pd.read_csv('./dashboard/newbeijing_climateData.csv')
 all_df.sort_values(by='DateTime', inplace=True)
 all_df.reset_index(inplace=True)
 all_df['DateTime'] = pd.to_datetime(all_df['DateTime'])
