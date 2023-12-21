@@ -11,15 +11,17 @@ pip install numpy pandas matplotlib streamlit
 
 in **notebook.ipynb** run:
 ```
-all_df.to_csv('./dashboard/beijing_climateData.csv', index= False)
+all_df.to_csv('./dashboard/newbeijing_climateData.csv', index= False)
 ```
 ## Run steamlit app
 
 in terminal run:
 ```
-# if from Submission
 streamlit run .\dashboard\dashboard.py
-# if direct folder dashboard
-streamlit run dashboard.py
-
 ```
+
+## Dashboard Result
+
+Click [here](https://air-quality-dataset-2-artsam.streamlit.app/)
+
+![alt]('Screenshot.png')
