@@ -3,21 +3,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import streamlit as st
-
 # Olah Data Cuaca Bulanan
 def make_monthly_climateBeijing(df):
-    monthly_climateBeijing = df.groupby(by=[df['DateTime'].dt.year.rename('Tahun'), 
-                                            df['DateTime'].dt.month.rename('Bulan')]).agg({
+    monthly_climateBeijing = df.groupby(by=[df['DateTime'].dt.year.rename('Year'), 
+                                            df['DateTime'].dt.month.rename('Month')]).agg({
                                             'RAIN': 'sum',
                                             'TEMP': ['min', 'mean', 'max'],
                                             'Rh' : 'mean'
                                         })
-    monthly_climateBeijing.columns = ['Curah Hujan', 'Suhu Minimum', 'Suhu Rerata', 'Suhu Maksimum', 'Kelembapan']
+    monthly_climateBeijing.columns = ['Rainfall', 'Min_Temp', 'Mean_Temp', 'Max_Temp', 'Humid']
     monthly_climateBeijing.reset_index(inplace=True)
-    monthly_climateBeijing['Tanggal'] = pd.to_datetime(monthly_climateBeijing['Tahun'].astype(str) + '-' + \
-                                                    monthly_climateBeijing['Bulan'].astype(str), format='%Y-%m')
-    monthly_climateBeijing.drop(columns= ['Tahun', 'Bulan'], inplace=True)
-    monthly_climateBeijing.insert(0, 'Tanggal', monthly_climateBeijing.pop('Tanggal'))
+    monthly_climateBeijing['Date'] = pd.to_datetime(monthly_climateBeijing['Year'].astype(str) + '-' + \
+                                                    monthly_climateBeijing['Month'].astype(str), format='%Y-%m')
+    monthly_climateBeijing.drop(columns= ['Year', 'Month'], inplace=True)
+    monthly_climateBeijing.insert(0, 'Date', monthly_climateBeijing.pop('Date'))
     return monthly_climateBeijing
 
 # Olah Data Polutan
@@ -79,12 +78,12 @@ with st.sidebar:
 
     st.caption('by :blue[Andi Artsam] | Dicoding Course')
 
-x = monthly_climateBeijing['Tanggal']
-y1 = monthly_climateBeijing['Curah Hujan']
-y2 = monthly_climateBeijing['Suhu Minimum']
-y3 = monthly_climateBeijing['Suhu Rerata']
-y4 = monthly_climateBeijing['Suhu Maksimum']
-y5 = monthly_climateBeijing['Kelembapan']
+x = monthly_climateBeijing['Date']
+y1 = monthly_climateBeijing['Rainfall']
+y2 = monthly_climateBeijing['Min_Temp']
+y3 = monthly_climateBeijing['Mean_Temp']
+y4 = monthly_climateBeijing['Max_Temp']
+y5 = monthly_climateBeijing['Humid']
 bt1, bt2, bt3 = 100, 300, 500
 
 stationList = pollutantSum_byYear['station'].drop_duplicates().to_list()
@@ -96,7 +95,7 @@ station = Beijing_in_AQICategorySum['station']
 nilaiAQI = Beijing_in_AQICategorySum['Nilai AQI']
 
 
-tab1, tab2= st.tabs(['⛅Climate Change', '⚡Pollutant Emission'])
+tab1, tab2, tab3= st.tabs(['⛅ Climate Change', '⚡ Pollutant Emission', 'ℹ About'])
 
 with tab1:
     st.header('Monthly Rainfall', divider = True)
@@ -120,6 +119,33 @@ with tab1:
         plt.show()
 
     st.pyplot(fig)
+    with st.expander("See source code"):
+        st.code(
+            '''
+            import matplotlib.pyplot as plt
+
+            x = monthly_climateBeijing['Date']
+            y1 = monthly_climateBeijing['Rainfall']
+            
+            fig = plt.figure(figsize=(10, 6))
+            plt.plot(x, y1, marker='o', linewidth=2, label='Rainfall', color='blue')
+
+            plt.axhline(y=bt1, color='green', linestyle='--', label='Low Upper Limit')
+            plt.axhline(y=bt2, color='orange', linestyle='--', label='Medium Upper Limit')
+            plt.axhline(y=bt3, color='red', linestyle='--', label='High Upper Limit')
+
+            plt.title("Monthly Rainfall in the Beijing Area for 5 years", fontsize=20)
+            plt.xlabel("Date", fontsize=12)
+            plt.ylabel("Rainfall (mm/month)", fontsize=12)
+            plt.grid(True)
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plt.legend()
+            plt.show()
+
+            st.pyplot(fig)
+            ''', language='python'
+        )
 
     st.header('Temperature', divider = True)
     st.subheader(f'from {start_date} to {end_date}')
@@ -147,6 +173,41 @@ with tab1:
     
     st.pyplot(fig)
 
+    with st.expander("See source code"):
+        st.code(
+            '''
+            import matplotlib.pyplot as plt
+            import matplotlib.dates as mdates
+
+            x = monthly_climateBeijing['Date']
+            y2 = monthly_climateBeijing['Min_Temp']
+            y3 = monthly_climateBeijing['Mean_Temp']
+            y4 = monthly_climateBeijing['Max_Temp']
+
+            fig = plt.figure(figsize=(10, 6))
+            plt.plot(x, y2, marker='o', linewidth=2, label='Min Temperature', color='yellow')
+            plt.plot(x, y3, marker='o', linewidth=2, label='Mean Temperature', color='green')
+            plt.plot(x, y4, marker='o', linewidth=2, label='Max Temperature', color='red')
+
+            
+            x_numeric = mdates.date2num(x) 
+            coefficients = np.polyfit(x_numeric, y3, 1)
+            trend = np.polyval(coefficients, x_numeric)
+            plt.plot(x, trend, linestyle='--', color='black', label='Garis Tren')
+
+            plt.title("Average Monthly Temperature in the Beijing Area for 5 Years", fontsize=20)
+            plt.xlabel("Date", fontsize=12)
+            plt.ylabel("Temperature (°C)", fontsize=12)
+            plt.legend()
+            plt.grid(True)
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plt.show()
+        
+            st.pyplot(fig)
+            ''', language='python'
+        )
+
     st.header('Humidity', divider = True)
     st.subheader(f'from {start_date} to {end_date}')
 
@@ -168,6 +229,35 @@ with tab1:
         plt.tight_layout()
         plt.show()
     st.pyplot(fig)
+
+    with st.expander("See source code"):
+         st.code(
+             '''
+            import matplotlib.pyplot as plt
+
+            x = monthly_climateBeijing['Date']
+            y5 = monthly_climateBeijing['Humid']
+            bt1, bt2, bt3 = 100, 300, 500
+            ideal1, ideal2 = 45, 65
+
+            fig = plt.figure(figsize=(10, 6))
+            plt.plot(x, y5, marker='o', linewidth=2, label='Kelembapan', color='gray')
+
+            plt.axhline(y=ideal1, color='green', linestyle='--', label='Ideal Upper Limit')
+            plt.axhline(y=ideal2, color='green', linestyle='--', label='Ideal Lower Limit')
+
+            plt.title("Average Humidity in the Beijing Area for 5 Years", fontsize=20)
+            plt.xlabel("Date", fontsize=12)
+            plt.ylabel("Humidity (%)", fontsize=12)
+            plt.grid(True)
+            plt.legend()
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plt.show()
+        
+            st.pyplot(fig)
+             ''', language='python'
+        )
 
 with tab2:
     st.header('Yearly Air Polution Level Based on Stations', divider = True)
@@ -202,6 +292,9 @@ with tab2:
             plt.suptitle("Air Pollution Levels in the Beijing Area for 5 Years", fontsize=20)
             plt.subplots_adjust(top=0.9)
             plt.show()
+
+            
+
         else:
             fig = plt.figure(figsize=(15,2))
             pol = option
@@ -219,8 +312,67 @@ with tab2:
             plt.grid(visible=True, axis= 'y')
 
             plt.show()
-        
+    
     st.pyplot(fig)
+
+    if option == 'All':
+        with st.expander('See resource code'):
+            st.code(
+                '''
+                import matplotlib.pyplot as plt
+
+                fig, ax = plt.subplots(nrows=6, ncols=1, figsize=(15, 12))
+
+                for i, label in enumerate(labels):
+                    for year in range(2013, 2018):
+                        ax[i].bar(xPos + (barWidth * (year - 2013)), 
+                                pollutantSum_byYear.loc[pollutantSum_byYear['Tahun'] == year, label].tolist(), 
+                                width=barWidth,
+                                label=f'{year}')
+                    ax[i].set_xticks(xPos + (barWidth * 2))
+                    ax[i].set_xticklabels(stationList)
+                    ax[i].set_xlabel('Station')
+                    if label == 'CO':
+                        ax[i].set_ylabel('mg/m³')
+                    else:
+                        ax[i].set_ylabel('µg/m³')
+                    ax[i].set_title(label, pad=10)
+                    ax[i].grid(visible=True, axis= 'y')
+
+                plt.tight_layout()
+                plt.legend(title='Year', loc='right', bbox_to_anchor=(1.1, 6))
+                plt.suptitle("Air Pollution Levels in the Beijing Area for 5 Years", fontsize=20)
+                plt.subplots_adjust(top=0.9)
+                plt.show()
+
+                st.pyplot(fig)
+                ''', language='python'
+            )
+    else:
+        with st.expander('See resource code'):
+            st.code(
+                '''
+                import matplotlib.pyplot as plt
+
+                fig = plt.figure(figsize=(15,2))
+                pol = option
+                for i, year in enumerate([2013, 2014, 2015, 2016, 2017]):
+                    plt.bar(xPos + (barWidth * i), pollutantSum_byYear.loc[pollutantSum_byYear['Tahun'] == year, pol].tolist(), width=barWidth, label=f'{year}')
+
+                plt.xticks(xPos + (barWidth * 2), stationList)
+                plt.xlabel('Station')
+                if pol == 'CO':
+                    plt.ylabel('mg/m³')
+                else:
+                    plt.ylabel('µg/m³')
+                plt.title(pol)
+                plt.legend(title='Year', bbox_to_anchor=(1.05, 1), loc='upper left')
+                plt.grid(visible=True, axis= 'y')
+
+                plt.show()
+                st.pyplot(fig)
+                ''',language='python'
+            )
 
     st.header('Air Quality Index', divider = True)
 
@@ -232,3 +384,27 @@ with tab2:
         plt.title('Air Quality Index Based on Stations in the Beijing Area for 5 Years')
         plt.show()
     st.pyplot(fig)
+    with st.expander('See resource code'):
+        st.code(
+            '''
+            import matplotlib.pyplot as plt
+
+            fig = plt.figure(figsize=(10,5))
+            plt.barh(station, nilaiAQI, color= 'r')
+            plt.ylabel('Station')
+            plt.xlabel('Air Quality Index (AQI) Value')
+            plt.title('Air Quality Index Based on Stations in the Beijing Area for 5 Years')
+            plt.show()
+
+            st.pyplot(fig)
+            ''',language='python'
+        )
+
+with tab3:
+    st.header('⚠ Disclaimer ⚠')
+    st.write('This dashboard is only for data visual learning purpose.')
+    st.write('All dataset in this dasboard could be changed from the source.')
+
+    st.link_button('Go to the dataset','https://github.com/marceloreis/HTI/tree/master')
+
+    
