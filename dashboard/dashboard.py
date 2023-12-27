@@ -95,7 +95,7 @@ station = Beijing_in_AQICategorySum['station']
 nilaiAQI = Beijing_in_AQICategorySum['Nilai AQI']
 
 
-tab1, tab2, tab3= st.tabs(['⛅ Climate Change', '⚡ Pollutant Emission', 'ℹ About'])
+tab1, tab2, tab3= st.tabs(['⛅ Climate Change', '⚡ Pollutant Emission', '📝 Metadata'])
 
 with tab1:
     st.header('Monthly Rainfall', divider = True)
@@ -401,10 +401,18 @@ with tab2:
         )
 
 with tab3:
-    st.header('⚠ Disclaimer ⚠')
-    st.write('This dashboard is only for data visual learning purpose.')
-    st.write('All dataset in this dasboard could be changed from the source.')
+    st.header('Provenance', divider=True)
 
-    st.link_button('Go to the dataset','https://github.com/marceloreis/HTI/tree/master')
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader('Source')
+        st.write('https://github.com/marceloreis/HTI/tree/master')
+
+    with col2:
+        st.subheader('Collection Methodology')
+        st.write('https://github.com/QaruzDin/Air-Quality-Dataset-2.0/blob/main/notebook.ipynb')        
+
+    st.caption('This dashboard is only for data visual learning purpose. All dataset in this dasboard could be changed from the source.')
 
     
